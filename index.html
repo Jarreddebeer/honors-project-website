@@ -6,6 +6,15 @@
     <link rel="stylesheet" href="./css/style.css" />
     <link rel="stylesheet" href="./css/font-awesome.min.css">
     <title>Accelerating Automated Extraction of Radio Astronomical Sources from Observation Data with GPU Accelerators</title>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+          processEscapes: true
+        }
+      });
+    </script>
+     <script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 </head>
 
 <div class="app-wrapper">
@@ -274,6 +283,7 @@ We ran the OpenMP accelerated implementation on a varying number of cores to det
 </p>
 
 <h3>Software Development Methodology</h3>
+<p>
 An Agile methodology was used over the course of this project.
 Our tasks are divided into small phases.
 Each sprint completes at least one phase including running all correctness checking.
@@ -321,8 +331,12 @@ The original version is written in one monolithic function, we split it up into 
 Identifying the next acceleration step follows from profiling our implementation as per the assess step of the APOD process.
 Finding where our program is the slowest helps us identify what part to accelerate.
 A profiler is used to find slow parts of the program.
-Figure 3 a show us the profiling information of this implementation.
-It can be seen that 91\% of total execution time is spent in convolving data cubes and that this is the logical section to accelerate.
+<p class="centered">
+<img class="img-thumbnail" src="duchamp/simple-profile.png">
+</p>
+<p>
+The figure above shows us the profiling information of this implementation.
+It can be seen that 91% of total execution time is spent in convolving data cubes and that this is the logical section to accelerate.
 
 </p>
 
@@ -333,8 +347,7 @@ We accelerated our naive A' Trous algorithm with OpenMP on all the threads avail
 Identifying the next acceleration step follows from profiling our implementation as per the assess step of the APOD process.
 Finding where our program is the slowest helps us identify what part to accelerate.
 A profiler is used to find slow parts of the program.
-Figure 3 a show us the profiling information of this implementation.
-It can be seen that 91\% of total execution time is spent in convolving data cubes and that this is the logical section to accelerate.
+It can be seen that 91% of total execution time is spent in convolving data cubes and that this is the logical section to accelerate.
 
 </p>
 
@@ -383,17 +396,23 @@ Using templates prevents branch divergence and unnecessary comparisons when the 
 
 <h3>Results and Discussion</h3>
 <p>
-Benchmarking shows that the separable GPU implementation (shown in Figure 2 a) is the fastest over all data cube sizes.
+<p class="centered">
+<img class="img-thumbnail" src="duchamp/overview.png">
+</p>
+Benchmarking shows that the separable GPU implementation (shown in the figure above) is the fastest over all data cube sizes.
 Our reimplementation of the single-threaded algorithm (labeled ``simple'' on the graph) does not perform as well as the original DUCHAMP implementation.
 Not much effort was put into optimising this version and this is to be expected.
 </p><p>
 
-Profiling the simple implementation shows that 91\% of the execution time is spent performing convolution.
+Profiling the simple implementation shows that 91% of the execution time is spent performing convolution.
 This is consistent with the analysis by Badenhorst et al.
-</p><p>
+</p>
 
-
-The speedup graph on Figure 2 b shows the speedup of each implementation compared to DUCHAMP's execution time.
+<p class="centered">
+<img class="img-thumbnail" src="duchamp/speedup.png">
+</p>
+<p>
+The speedup graph above shows the speedup of each implementation compared to DUCHAMP's execution time.
 Each implementation shows a horizontal speedup for medium to large data cubes.
 This tells us that the speedup does not change based on data cube size with the exception of small data cubes.
 The increasing speedup for small data cubes can be attributed to constant time startup times that dominate when noise removal takes a short amount of time. 
@@ -412,17 +431,24 @@ Algorithmic optimisation improves execution time without requiring specialised o
 This is beneficial to existing users of DUCHAMP as they do not need to purchase hardware and can simply update in order to benefit from this speedup.
 Integrating this change into DUCHAMP would be rather simple as all changes are contained within a single module and would not require software architectural changes.
 
+</p>
+
+<p class="centered">
+<img class="img-thumbnail" src="duchamp/openmp-hex-threads-speedup.png">
 </p><p>
 The OpenMP benchmark was run on a desktop machine as well as the Hex computing cluster.
 The desktop machine has four physical cores each with Hyper-Threading enabled.
 Hyper-Threading lets a single physical core appear as two logical cores.
-Figure 4 c plots the speedup of the implementation versus the number of threads running on the desktop.
+Figure 4 c above plots the speedup of the implementation versus the number of threads running on the desktop.
 Speedup grows with the number of cores until we reach the number of physical cores available.
 Increasing the number of cores still gives us an increase in speedup but at a much lower rate.
 Adding four more virtual core only gives us a speedup from 3.5x to 4.5x.
 
+</p>
+<p class="centered">
+<img class="img-thumbnail" src="duchamp/openmp-hex-threads.png">
 </p><p>
-Running on the Hex computing cluster (Figure 4 a and b) showed that increasing the number of cores gives a linear increase in speedup.
+Running on the Hex computing cluster showed that increasing the number of cores gives a linear increase in speedup.
 The speedup is less than the number of cores it is run on and appears to grow linearly.
 
 </p><p>
@@ -430,11 +456,11 @@ The initial GPU port of the convolution algorithm split the calculation of calcu
 It was quickly determined by profiling that this was not making efficient use of the available computing resources.
 We made each thread compute a single voxels result instead of only a part of it. 
 This improved the speedup from 3x to 11x by a simple reallocation of work.
-The speedup of each separable GPU implementation is shown in Figure 2 b as separable\_gpu and separable\_gpu2 respectively.
+The speedup of each separable GPU implementation is shown in Figure 2 b as separable_gpu and separable_gpu2 respectively.
 
 </p><p>
 Porting the separable implementation the GPU gave a 5.8x speedup over the single-threaded version and 11x overall against the benchmark.
-Profiling this accelerated implementation shows that convolution no longer dominates the execution time of the algorithm and only contributes to 14\% of total execution time (see Figure 3 b). 
+Profiling this accelerated implementation shows that convolution no longer dominates the execution time of the algorithm and only contributes to 14% of total execution time (see Figure 3 b). 
 54\% of execution time is now spent in the thresholding operation.
 Further acceleration of convolution would now show diminishing returns.
 
@@ -454,7 +480,7 @@ This was due to the overhead of copying to and from GPU memory.
 
 </p><p>
 We measured the accuracy of our implementations by calculating the absolute difference between our implementations results and DUCHAMP. 
-We found that the average absolute difference was $2 \cdot 10^{-6$. 
+We found that the average absolute difference was $2 \cdot 10^{-6}$. 
 This is small enough that it does not affect the remaining 
 
 </p>
