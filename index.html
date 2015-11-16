@@ -1,7 +1,6 @@
 <html lang="en">
 <head>
     <link rel="stylesheet" href="./css/bootstrap.min.css" />
-    <link rel="stylesheet" href="./css/github-markdown.css" />
     <link rel="stylesheet" href="./css/lightbox.css" />
     <link rel="stylesheet" href="./css/style.css" />
     <link rel="stylesheet" href="./css/font-awesome.min.css">
@@ -122,7 +121,7 @@
 
 
     <div class="row" id="writeup">
-        <div class="col-sm-6">
+        <div class="col-sm-6" style="border-right: 1px solid #ccc;">
 
             <div class="speedup-graph quote">
                 <p><i class="fa fa-quote-left"></i>
@@ -542,15 +541,11 @@ DUCHAMP has a long serial pipeline and improvements need to be made at every sta
 
 
 
-
-
-
-
         </div>
         <div class="col-sm-6">
 
-            <div class="speedup-graph quote">
-                <p><i class="fa fa-quote-left"></i>S+C acceleration increased with cube size from 2.88x on a 327MB data cube to 8.6x on a 2.3GB data cube. Execution time reduced from 535 seconds to 70 seconds, a 7.6x speedup which makes GPU processing favorable.<i class="fa fa-quote-right"></i></p>
+            <div class="speedup-graph quote" style="min-height: 341px;">
+                <p style="margin-top: 60px;"><i class="fa fa-quote-left"></i>S+C acceleration increased with cube size from 2.88x on a 327MB data cube to 8.6x on a 2.3GB data cube. Execution time reduced from 535 seconds to 70 seconds, a 7.6x speedup which makes GPU processing favorable.<i class="fa fa-quote-right"></i></p>
             </div>
 
             <h3>Introduction</h3>
@@ -732,137 +727,24 @@ DUCHAMP has a long serial pipeline and improvements need to be made at every sta
 
 
 <script src="./js/jquery.min.js"></script>
-<script src="./js/markdown.min.js"></script>
 <script src="./js/lightbox.min.js"></script>
 <script>
-
-/* MARKDOWN */
-
-var src_sofia = document.getElementById('report-source-sofia');
-var tgt_sofia = document.getElementById('report-target-sofia');
-// tgt_sofia.innerHTML = markdown.toHTML(src_sofia.textContent);
-
-var src_duchamp = document.getElementById('report-source-duchamp');
-var tgt_duchamp = document.getElementById('report-target-duchamp');
-// tgt_duchamp.innerHTML = markdown.toHTML(src_duchamp.textContent);
-
-
-/* GRAPHS */
-
-/*
-render_speedups(".sofia .speedup-graph");
-
-function render_speedups(selector) {
-
-        // Set the dimensions of the canvas / graph
-    var margin = {top: 30, right: 20, bottom: 30, left: 50},
-        width = 650 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom;
-
-    // Set the ranges
-    var x = d3.scale.linear().range([0, width]);
-    var y = d3.scale.linear().range([height, 0]);
-
-    // Define the axes
-    var xAxis = d3.svg.axis().scale(x)
-        .orient("bottom").ticks(5);
-
-    var yAxis = d3.svg.axis().scale(y)
-        .orient("left").ticks(5);
-
-    // Define the line
-    var valueline = d3.svg.line()
-        .x(function(d) { return x(d.size); })
-        .y(function(d) { return y(d.duration); });
-
-    // Adds the svg canvas
-    var svg = d3.select(selector)
-        .append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-            .attr("transform",
-                  "translate(" + margin.left + "," + margin.top + ")");
-
-    // Get the data
-    data_original = [
-        {size:327,duration:72},
-        {size:720,duration:163},
-        {size:2300,duration:535},
-    ];
-
-    data_accelerated = [
-        {size:327,duration:20},
-        {size:720,duration:31},
-        {size:2300,duration:70},
-    ];
-
-
-        // Scale the range of the data
-        x.domain([200, 2400]);
-        y.domain([0, 600]);
-
-        // Add the valueline path.
-        svg.append("path")
-            .attr("class", "line")
-            .attr("d", valueline(data_original))
-            .attr("stroke", "red");
-
-        // Add the valueline path.
-        svg.append("path")
-            .attr("class", "line")
-            .attr("d", valueline(data_accelerated))
-            .attr("stroke", "green");
-
-        // Add the markers
-        svg.selectAll('circle.mark.orig').data(data_original).enter().append('svg:circle')
-            .attr('class', 'mark')
-            .attr('cx', function(d){return x(d.size);})
-            .attr('cy', function(d){return y(d.duration);})
-            .attr('fill', 'red')
-            .attr('r', 3.5);
-
-        svg.selectAll('circle.mark.accel').data(data_accelerated).enter().append('svg:circle')
-            .attr('class', 'mark')
-            .attr('cx', function(d){return x(d.size);})
-            .attr('cy', function(d){return y(d.duration);})
-            .attr('fill', 'green')
-            .attr('r', 3.5);
-
-        // Add the X Axis
-        svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
-
-        // Add the Y Axis
-        svg.append("g")
-            .attr("class", "y axis")
-            .call(yAxis);
-
-    //});
-
-}
-*/
-
 
 
 /* STAR FIELD GENERATION */
 
 // generate star fields
-/*
-generate_star_field(400, 1, 'far');
-generate_star_field(160, 2, 'medium');
-generate_star_field(30, 4, 'nearby');
-generate_lightspeed_field(8);
-*/
+generate_star_field(200, 1, 'far');
+generate_star_field(80, 2, 'medium');
+generate_star_field(15, 4, 'nearby');
+generate_lightspeed_field(4);
 
 function generate_star_field(population, radius, container) {
 
         ['a', 'b'].forEach(function(k) {
 
             var starfield = $('.starfield.' + container + '.' + k);
-            var height = $('#introduction').outerHeight() + 60;
+            var height = $('#introduction').outerHeight() - 200;
             var width = $('#introduction').width();
             starfield.css('height', height);
             starfield.css('width', width);
@@ -887,7 +769,7 @@ function generate_lightspeed_field(population) {
     ['a', 'b'].forEach(function(k) {
 
         var starfield = $('.lightspeed-starfield.' + k);
-        var height = $('#introduction').outerHeight() + 60;
+        var height = $('#introduction').outerHeight() - 200;
         var width = $('#introduction').width();
         starfield.css('height', height);
         starfield.css('width', width);
