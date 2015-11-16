@@ -6,15 +6,6 @@
     <link rel="stylesheet" href="./css/style.css" />
     <link rel="stylesheet" href="./css/font-awesome.min.css">
     <title>Accelerating Automated Extraction of Radio Astronomical Sources from Observation Data with GPU Accelerators</title>
-    <script type="text/x-mathjax-config">
-      MathJax.Hub.Config({
-        tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"] ],
-          processEscapes: true
-        }
-      });
-    </script>
-     <script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 </head>
 
 <div class="app-wrapper">
@@ -371,7 +362,7 @@ In later phases we can avoid this copy by only modifying the data cube on the GP
 </p><p>
 Each thread on the GPU calculates the partial convolution of a single voxel with a single filter element.
 A block of threads calculates the complete convolution of a single voxel in the data cube.
-The partial results within a block are added using parallel reduction in $O(\log N)$ addition operations.
+The partial results within a block are added using parallel reduction in O(log N) addition operations.
 The input and output matrices are stored in global memory and the filter in constant memory.
 Constant memory is a type of read-only global memory that caches lookups within the streaming multiprocessor for faster subsequent accesses.
 </p>
@@ -477,7 +468,7 @@ Further acceleration of convolution would now show diminishing returns.
 </p><p>
 Thresholding involves removing all values of a matrix that are above some multiple of the median of the matrix.
 Finding the median is performed with the average case linear time QuickSelect algorithm.
-Parallel merge sort has a time complexity of $O(\log N)$ with $N$ parallel cores which is better than the complexity of QuickSelect.
+Parallel merge sort has a time complexity of O(log N) with N parallel cores which is better than the complexity of QuickSelect.
 Replacing QuickSelect with parallel merge sort on the GPU was more than twice as slow as the highly optimized QuickSelect from the C++ standard template library.
 Accelerating the thresholding proved to be difficult.
 Selavy suffered from this problem and solved it by calculating the median of a subset of the data which can be done faster at the expense of precision. 
@@ -490,7 +481,7 @@ This was due to the overhead of copying to and from GPU memory.
 
 </p><p>
 We measured the accuracy of our implementations by calculating the absolute difference between our implementations results and DUCHAMP. 
-We found that the average absolute difference was $2 \cdot 10^{-6}$. 
+We found that the average absolute difference was 2 x 10**-6. 
 This is small enough that it does not affect the remaining 
 
 </p>
