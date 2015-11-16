@@ -176,20 +176,20 @@ We first investigate bottlenecks in the source finder, find algorithmic improvem
 </p>
 <h3>DUCHAMP</h3>
 <p>
-\textsc{Duchamp} is a three dimensional source finder written by Matthew Whiting at the Australia Telescope National Facility. 
-The \textsc{Duchamp} source finding strategy  is the most reliable and complete of all source finding strategies that were tested by Popping et al \cite{popping2012comparison}.
+DUCHAMP is a three dimensional source finder written by Matthew Whiting at the Australia Telescope National Facility. 
+The DUCHAMP source finding strategy  is the most reliable and complete of all source finding strategies that were tested by Popping et al.
 This makes it an ideal candidate for acceleration, as it would be the most useful for use by future large hydrogen surveys. 
 </p><p>
 
-\textsc{Duchamp} currently runs in a single thread on a single CPU core.
-There have been multiple attempts to run parts of the \textsc{Duchamp} pipeline over multiple CPU cores \cite{scott}.
+DUCHAMP currently runs in a single thread on a single CPU core.
+There have been multiple attempts to run parts of the DUCHAMP pipeline over multiple CPU core.
 Badenhorst et al successfully sped up the A' Trous noise removal algorithm, which was the greatest contributor to the execution time, by 13x with eight threads on a quad-core CPU.
 This speed up came with a 6x memory usage penalty.
 They found that with the speed up in the noise removal the execution time is now dominated by the statistics section of the pipeline.
 Finally, they note that GPU acceleration has the potential to dramatically increase performance.
 
 </p><p>
-Selavy \cite{whiting2012source} is a distributed version of \textsc{Duchamp} that runs across multiple CPU cores across multiple hosts using the Messaging Passing Interface to communicate between hosts.
+Selavy 2012source is a distributed version of DUCHAMP that runs across multiple CPU cores across multiple hosts using the Messaging Passing Interface to communicate between hosts.
 It too accelerated the noise removal algorithm with a small loss in precision due to using approximate statistics methods and converting from computation with doubles to floats. 
 It was designed to run on a cluster of nodes each with several CPU cores where the entire data cube is unable to fit onto a single node. 
 </p>
@@ -198,6 +198,308 @@ It was designed to run on a cluster of nodes each with several CPU cores where t
 
 
 
+<h3>Design</h3>
+
+<h4>Aims</h4>
+<p>
+We aim to accelerate DUCHAMP's noise removal with algorithmic improvements and parallelism to reduce the execution time of the source finder with large data volumes expected from next generation radio telescopes.
+We aim for a simple design that is simple to reintegrate into DUCHAMP.
+</p>
+
+<h4>Approach</h4>
+<p>
+DUCHAMP's current implementation is single threaded and uses an inefficient version of A' Trous reconstruction. 
+</p><p>
+
+We accelerate the A' Trous wavelet reconstruction noise removal algorithm with algorithmic improvements and parallelism.
+CUDA and OpenMP will be used to parallelise our implementations on the GPU and CPU respectively.
+
+</p><p>
+All improvements will be performed on our own code base separate from DUCHAMP to simplify testing and development.
+We implement only the code related to reading and writing FITS files and noise reduction.
+
+</p><p>
+Our accelerated version of the A' Trous reconstruction is implemented in several phases with a working implementation at the end of every phase.
+This reduces the risk of failure due to high levels of complexity.
+We verified the correctness of each implementation at the end of each phase.
+
+</p>
+
+<h4>Constraints</h4>
+<p>
+The proprietary CUDA API requires us to use NVidia GPUs in order to run the accelerated DUCHAMP pipeline.
+We will not distribute execution over multiple hosts or run data cubes bigger RAM available on a single host due to time constraints.
+DUCHAMP and CUDA are written in C++ and our implementation will be written in C++ as well.
+
+</p><p>
+Any optimisations that reduce the accuracy of our results will not be attempted to conform to the output of DUCHAMP.
+Maintaining backwards compatibility is important to allow our changes to be integrated to DUCHAMP in the future.
+</p>
+<h3>Evaluation</h3>
+<h4>Validation</h4>
+<p>
+We will evaluate the correctness of our implementations using synthetic data cubes created by Dr Ed Nelson of the UCT Astrophysics department.
+Testing with synthetic data cubes is advantageous due to the fact that exact source information is available and can be used to accurately measure completeness and reliability.
+Correctness is simply whether the accelerated algorithm produces equivalent outputs to the original DUCHAMP implementation.
+A small error is allowed for each value in the data cube due to floating-point approximations.
+
+</p><p>
+To check correctness we run both the original and accelerated implementations with the same inputs and log the outputs of each.
+The outputs are then compared for floating-point equality and the floating-point error between the two implementations is logged.
+</p>
+<h4>Execution time</h4>
+<p>
+On completion of each phase the execution time of our accelerated implementation is measured.
+</p><p>
+
+The size of the input data cube and the filter size are the only factors that affect the execution time.
+</p><p>
+
+To determine the relationship between the size of the input data cube and execution time we test with data cubes of various sizes.
+We create data cubes of various sizes by taking subsections of an existing large data cube.
+Each implementation is run on all test data cubes three times and the results are averaged over all three executions.
+This is done to minimize the affect of background processes on performance.
+</p><p>
+
+Our measured execution time is compared to the original DUCHAMP implementation and we measure the speedup.
+</p><p>
+
+We benchmarked the result of each phase with data cubes of various sizes. 
+The benchmarks were run on a desktop with an Intel i7-4790 clocked at 3.6GHz, 8GB of RAM and a NVidia GTX 970 graphics card
+as well as the Hex computing cluster run by ICTS.
+The Hex cluster has ten NVidia Tesla M2090 GPU's that are designed for general purpose computing and a CPU compute cluster with 18 hosts each with 64 cores and 128 GB RAM.
+We use the CPU compute cluster for testing our OpenMP implementation.
+We ran the OpenMP accelerated implementation on a varying number of cores to determine its relationship with execution time.
+
+</p>
+
+<h3>Software Development Methodology</h3>
+An Agile methodology was used over the course of this project.
+Our tasks are divided into small phases.
+Each sprint completes at least one phase including running all correctness checking.
+The agile methodology is appropriate for this project as it allows us to ensure a continuously working product and prevents us from having a monolithic "acceleration" step to our project.
+</p><p>
+
+NVidia has released a guide on what they consider the best work-flow to accelerate your code with GPUs 2012best.
+They suggest a four stage acceleration cycle as follows:
+</p><p>
+
+<p>
+<ol>
+    <li> <b>Assess</b> the program, find bottlenecks and small sections of code that dominate execution time by profiling.
+    Use Amdahl's and Gustafson's law make a prediction of the theoretical speedup that can be attained by paralellising this bottleneck and use this information to decide the best section to accelerate.</li>
+    <li> <b>Parallelise</b> the bottleneck found in the previous step.
+        The code may be paralellised using OpenMP or CUDA.
+        This may require some factorising if the code is not written in a way that easily allows paralellism.</li>
+        
+        <li> <b>Optimise</b> the code as much as possible.</li>
+
+        <li> <b>Deploy</b> and analyse the results.
+        If this was production software we would deploy to consumers at this stage.</li>
+</ol>
+</p>
+
+<h3>Implementation</h3>
+<p>
+In this section we present the details of our accelerated implementations.
+</p><p>
+
+We use the cfitsio library to read and write FITS files and the CUDA toolkit version 7.5 for our GPU code.
+To simplify the evaluation the accelerated A' Trous algorithm is implemented independently from DUCHAMP.
+Our application accepts a three-dimensional telescope observation in a FITS file as input and outputs the noise reduced cube.
+</p>
+
+<h4>Phase 1: Naive Single Threaded</h4>
+<p>
+This phase is a reimplementation of the single threaded A' Trous algorithm in DUCHAMP.
+
+</p><p>
+Our rewrite is easier to understand than the original DUCHAMP implementation as we factored out many common methods and refactored common sections.
+The original version is written in one monolithic function, we split it up into easier to understand methods.
+
+</p><p>
+Identifying the next acceleration step follows from profiling our implementation as per the assess step of the APOD process.
+Finding where our program is the slowest helps us identify what part to accelerate.
+A profiler is used to find slow parts of the program.
+Figure 3 a show us the profiling information of this implementation.
+It can be seen that 91\% of total execution time is spent in convolving data cubes and that this is the logical section to accelerate.
+
+</p>
+
+<h4>Phase 2: OpenMP</h4>
+<p>
+We accelerated our naive A' Trous algorithm with OpenMP on all the threads available to the CPU. 
+</p><p>
+Identifying the next acceleration step follows from profiling our implementation as per the assess step of the APOD process.
+Finding where our program is the slowest helps us identify what part to accelerate.
+A profiler is used to find slow parts of the program.
+Figure 3 a show us the profiling information of this implementation.
+It can be seen that 91\% of total execution time is spent in convolving data cubes and that this is the logical section to accelerate.
+
+</p>
+
+<h4>Phase 2: OpenMP</h4>
+<p>
+We accelerated our naive A' Trous algorithm with OpenMP on all the threads available to the CPU. 
+
+</p><p>
+This was done by applying parallel directives around the convolution loop (step 7 of Algorithm 1). 
+These directives let subsections of the data cube be convolved in parallel. 
+This is possible since convolution does not have any intermediate data dependencies.
+</p>
+<h4>Phase 3</h4>
+<p>
+This phase ported convolution to the GPU.
+The partially de-noised data cube is copied to the GPU before convolution and back to the host after the convolution for further processing.
+In later phases we can avoid this copy by only modifying the data cube on the GPU. 
+
+</p><p>
+Each thread on the GPU calculates the partial convolution of a single voxel with a single filter element.
+A block of threads calculates the complete convolution of a single voxel in the data cube.
+The partial results within a block are added using parallel reduction in $O(\log N)$ addition operations.
+The input and output matrices are stored in global memory and the filter in constant memory.
+Constant memory is a type of read-only global memory that caches lookups within the streaming multiprocessor for faster subsequent accesses.
+</p>
+
+<h4>Phase 4</h4>
+<p>
+This phase incorporates the benefits of separable filtering into the single threaded naive implementation.
+The three-dimensional filter is broken up into three one-dimensional filters and applied individually.
+Additional memory is required to store the intermediate results until all filters are applied.
+
+</p>
+
+<h4>Phase 5</h4>
+<p>
+We then port the separable implementation to the GPU.
+Each thread within a block calculates the result for a single voxel instead of splitting the computation over an entire block as done previously.
+Three kernels are execution, one for each one-dimensional filter.
+</p><p>
+
+C++ templates are used to specialise kernels for each filter used in the convolution.
+Using templates prevents branch divergence and unnecessary comparisons when the filter dimension is known at compile time. 
+
+</p>
+
+<h3>Results and Discussion</h3>
+<p>
+Benchmarking shows that the separable GPU implementation (shown in Figure 2 a) is the fastest over all data cube sizes.
+Our reimplementation of the single-threaded algorithm (labeled ``simple'' on the graph) does not perform as well as the original DUCHAMP implementation.
+Not much effort was put into optimising this version and this is to be expected.
+</p><p>
+
+Profiling the simple implementation shows that 91\% of the execution time is spent performing convolution.
+This is consistent with the analysis by Badenhorst et al.
+</p><p>
+
+
+The speedup graph on Figure 2 b shows the speedup of each implementation compared to DUCHAMP's execution time.
+Each implementation shows a horizontal speedup for medium to large data cubes.
+This tells us that the speedup does not change based on data cube size with the exception of small data cubes.
+The increasing speedup for small data cubes can be attributed to constant time startup times that dominate when noise removal takes a short amount of time. 
+</p><p>
+
+The single-threaded separable algorithm performed better than OpenMP acceleration running on four cores.
+The speedup relative to our simple implementation (on which the separable implementation is based) is 4.1x.
+The theoretical speedup of 8x discussed earlier is of the convolution algorithm in isolation.
+Our measured speedup is of the A' Trous algorithm in its entirety not just the convolution algorithm.
+Badenhorst et al had a speedup of 3.7x for their original separable implementation.
+They went on to optimise the separable implementation further by transposing the data cube to improve memory accesses and use vector CPU instructions to achieve a 4.5x speedup.
+</p><p>
+
+This shows that parallelism is not always the best first step for acceleration.
+Algorithmic optimisation improves execution time without requiring specialised or more expensive hardware.
+This is beneficial to existing users of DUCHAMP as they do not need to purchase hardware and can simply update in order to benefit from this speedup.
+Integrating this change into DUCHAMP would be rather simple as all changes are contained within a single module and would not require software architectural changes.
+
+</p><p>
+The OpenMP benchmark was run on a desktop machine as well as the Hex computing cluster.
+The desktop machine has four physical cores each with Hyper-Threading enabled.
+Hyper-Threading lets a single physical core appear as two logical cores.
+Figure 4 c plots the speedup of the implementation versus the number of threads running on the desktop.
+Speedup grows with the number of cores until we reach the number of physical cores available.
+Increasing the number of cores still gives us an increase in speedup but at a much lower rate.
+Adding four more virtual core only gives us a speedup from 3.5x to 4.5x.
+
+</p><p>
+Running on the Hex computing cluster (Figure 4 a and b) showed that increasing the number of cores gives a linear increase in speedup.
+The speedup is less than the number of cores it is run on and appears to grow linearly.
+
+</p><p>
+The initial GPU port of the convolution algorithm split the calculation of calculating a single voxels result over a block of threads.
+It was quickly determined by profiling that this was not making efficient use of the available computing resources.
+We made each thread compute a single voxels result instead of only a part of it. 
+This improved the speedup from 3x to 11x by a simple reallocation of work.
+The speedup of each separable GPU implementation is shown in Figure 2 b as separable\_gpu and separable\_gpu2 respectively.
+
+</p><p>
+Porting the separable implementation the GPU gave a 5.8x speedup over the single-threaded version and 11x overall against the benchmark.
+Profiling this accelerated implementation shows that convolution no longer dominates the execution time of the algorithm and only contributes to 14\% of total execution time (see Figure 3 b). 
+54\% of execution time is now spent in the thresholding operation.
+Further acceleration of convolution would now show diminishing returns.
+
+</p><p>
+Thresholding involves removing all values of a matrix that are above some multiple of the median of the matrix.
+Finding the median is performed with the average case linear time QuickSelect algorithm.
+Parallel merge sort has a time complexity of $O(\log N)$ with $N$ parallel cores which is better than the complexity of QuickSelect.
+Replacing QuickSelect with parallel merge sort on the GPU was more than twice as slow as the highly optimized QuickSelect from the C++ standard template library.
+Accelerating the thresholding proved to be difficult.
+Selavy suffered from this problem and solved it by calculating the median of a subset of the data which can be done faster at the expense of precision. 
+We are constrained to having output equivalent to that of DUCHAMP and was unable to perform this optimisation.
+
+</p><p>
+The various matrix addition and multiplication operations are the next largest contributers to execution time.
+Porting this to the GPU further slowed down execution time and this was reverted.
+This was due to the overhead of copying to and from GPU memory.
+
+</p><p>
+We measured the accuracy of our implementations by calculating the absolute difference between our implementations results and DUCHAMP. 
+We found that the average absolute difference was $2 \cdot 10^{-6$. 
+This is small enough that it does not affect the remaining 
+
+</p>
+<h3>Conclusions</h3>
+<p>
+In this paper we presented a series of performance improvements to the DUCHAMP source finder.
+The algorithmic and hardware changes are orthogonal and can be applied independently of each other.
+In the case that GPU hardware is not available the algorithmic improvements still apply.
+
+</p><p>
+Separable filtering is an algorithmic improvement that improved our execution time by 4.1x.
+</p><p>
+
+We found that the execution time of wavelet reconstruction noise removal is largely dominated by massively paralellisable convolution operations.
+The next largest contributor to execution time are statistics operations which we did not benefit from GPU acceleration.
+
+</p><p>
+We conclude that GPU acceleration is a viable and useful way to speed up the DUCHAMP source finder.
+The speedup achieved by OpenMP on ten cores is 7.8x which is comparable to that of our GPU accelerated implementation.
+OpenMP and the use of separable filtering is a lower cost way to achieve very good speedups without purchasing additional GPU hardware.  
+
+</p><p>
+Further improvements to noise reduction would require us to reduce the accuracy of our thresholding operation.
+
+</p><p>
+Overall we achieved a speedup of 11x over the DUCHAMP benchmark. 
+</p>
+
+
+<h3>Future Work</h3>
+<p>
+This implementation limited the size of the data cube to the size of GPU memory.
+This can be subverted in future implementations by streaming the data cube into the GPU, processing and then streaming it off.
+Hopefully this can provide a way to deal with arbitrarily large data cubes.
+</p><p>
+The strides in separable filtering prevent it from using the cache effectively.
+There are optimisations that first rotate the input before applying a filter that has been shown to improve performance.
+
+</p><p>
+DUCHAMP's source merging phase compares every detected source with every other source. This can be improved by a constant factor using space partitioning techniques.
+
+</p><p>
+DUCHAMP has a long serial pipeline and improvements need to be made at every stage to completely improve performance.
+
+</p>
 
 
 
