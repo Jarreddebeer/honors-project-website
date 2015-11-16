@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="./css/lightbox.css" />
     <link rel="stylesheet" href="./css/style.css" />
     <link rel="stylesheet" href="./css/font-awesome.min.css">
+    <title>Accelerating Automated Extraction of Radio Astronomical Sources from Observation Data with GPU Accelerators</title>
 </head>
 
 <div class="app-wrapper">
@@ -65,7 +66,11 @@
         <div class="duchamp col-sm-5">
             <div id="report-target-duchamp" class="col-sm-12 report">
                 <h1>DUCHAMP</h1>
-                <p>Yaseen's intro piece from poster</p>
+                <p>
+                
+               Duchamp is a 3-Dimensional spectral H1 source finder. it performs best when using the A' Trous wavelet reconstruction algorithm for noise removal. it removes noise at all scales on the entire cube at once. After noise removal it thresholds pixel values and merges nearby detected pixels to identify sources. We found that convolution took at least 67% of the execution time of the noise removal algorithm. This algorithm was accelerated with CUDA and OpenMP.
+                Accelerating convolution and certain matrix operations with openmp and cuda decreased this to 17% of the execution time with the thresholding now dominating execution time.
+                </p>
             </div>
         </div>
 
@@ -111,7 +116,9 @@
         <div class="col-sm-6">
 
             <div class="speedup-graph quote">
-                <p><i class="fa fa-quote-left"></i>Yaseen's conclusion from poster<i class="fa fa-quote-right"></i></p>
+                <p><i class="fa fa-quote-left"></i>
+               DUCHAMP GPU acceleration achieved an 11x speedup over the original version. OpenMP on 10 CPU cores achieved a 7.8x speedup. OpenMP and CUDA are favorable for accelerating the A' Trous wavelet reconstruction noise removal algorithm within DUCHAMP.
+                <i class="fa fa-quote-right"></i></p>
             </div>
 
             <h3>Yaseens content</h3>
