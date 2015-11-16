@@ -81,6 +81,8 @@ header.navbar#top {
     display: block;
     -webkit-animation:spin 8s linear infinite;
     -moz-animation:spin 8s linear infinite;
+    -ms-animation:spin 8s linear infinite;
+    -o-animation:spin 8s linear infinite;
     animation:spin 8s linear infinite;
 }
 @-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
@@ -184,29 +186,29 @@ p.centered {
 }
 
 .starfield.far.a {
-    animation-delay: -250s;
+    animation-delay: -400s;
 }
 .starfield.medium.a {
-    animation-delay: -150s;
+    animation-delay: -250s;
 }
 .starfield.nearby.a {
-    animation-delay: -50s;
+    animation-delay: -100s;
 }
 .lightspeed-starfield.a {
-    animation-delay: -10s;
+    animation-delay: -20s;
 }
 
 .starfield.far {
-    animation-duration: 500s;
+    animation-duration: 800s;
 }
 .starfield.medium {
-    animation-duration: 300s;
+    animation-duration: 500s;
 }
 .starfield.nearby {
-    animation-duration: 100s;
+    animation-duration: 200s;
 }
 .lightspeed-starfield {
-    animation-duration: 20s;
+    animation-duration: 40s;
 }
 
 .starfield.far circle {
@@ -225,8 +227,20 @@ p.centered {
   0%   { -webkit-transform: translateX(100%); }
   100% { -webkit-transform: translateX(-100%); }
 }
+@-moz-keyframes starfield {
+  0%   { -moz-transform: translateX(100%); }
+  100% { -moz-transform: translateX(-100%); }
+}
+@keyframes starfield {
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
 
 /* MAIN */
+
+.navbar-default .navbar-nav>li>a, .navbar-default .navbar-brand{
+    color: #ccc;
+}
 
 .app-wrapper {
     padding: 0 50px;
