@@ -68,7 +68,7 @@
                 <h1>DUCHAMP</h1>
                 <p>
                 
-               Duchamp is a 3-Dimensional spectral H1 source finder. it performs best when using the A' Trous wavelet reconstruction algorithm for noise removal. it removes noise at all scales on the entire cube at once. After noise removal it thresholds pixel values and merges nearby detected pixels to identify sources. We found that convolution took at least 67% of the execution time of the noise removal algorithm. This algorithm was accelerated with CUDA and OpenMP.
+               DUCHAMP is a 3-Dimensional spectral H1 source finder. it performs best when using the A' Trous wavelet reconstruction algorithm for noise removal. it removes noise at all scales on the entire cube at once. After noise removal it thresholds pixel values and merges nearby detected pixels to identify sources. We found that convolution took at least 67% of the execution time of the noise removal algorithm. This algorithm was accelerated with CUDA and OpenMP.
                 Accelerating convolution and certain matrix operations with openmp and cuda decreased this to 17% of the execution time with the thresholding now dominating execution time.
                 </p>
             </div>
@@ -121,7 +121,92 @@
                 <i class="fa fa-quote-right"></i></p>
             </div>
 
-            <h3>Yaseens content</h3>
+            <h3>Introduction</h3>
+
+<p>
+Radio astronomy is the study of the universe in the radio spectrum of light.
+Identifying galaxies from background noise is a crucial process in radio astronomy.
+This process is called source finding and can improve our understanding of galaxy evolution over time.
+Source finding is done by astronomers by hand. 
+This is a tedious and slow process that has been augmented by automated source finders.
+</p><p>
+
+Background noise emitted by man-made objects such as cellphones and satellites as well as natural sources like the cosmic microwave background radiation dominate observations in the radio spectrum.
+Galaxies sparsely populate the universe making them difficult to differentiate from background noise.
+This noise needs to be removed from observations before attempting to identify sources.
+All automated source finders perform a noise removal step. % is this necessary to say?
+
+</p><p>
+These galactic surveys produce three-dimensional outputs called data cubes that are typically stored in Flexible Image Transport System (FITS) files. 
+FITS was designed by the International Astronomy Union for storing and transferring astronomy image data.
+
+</p><p>
+Modern radio telescopes such as the Karoo Array Telescope (KAT) are more detailed and cover a larger volume of the sky than any existing telescope.
+Existing automated source finders are currently unable to process such large observations.
+They either run too slowly or limit the size of input observations to the size of memory.
+Source finders need to be improved for these use cases.
+
+</p><p>
+DUCHAMP is an automated source finder created at the Australia National Telescope Facility that suffers from the these problems.
+
+</p><p>
+A general technique to decrease the execution time of algorithms is by splitting the problem into several parts and executing a few at a time simultaneously.
+Modern desktop CPUs can run up to eight threads of execution in parallel while graphics processing units (GPUs) can execute up to several thousand simultaneously.
+
+</p><p>
+We propose using the computational power of GPUs to speed up DUCHAMP.
+
+</p><p>
+CUDA is a proprietary API that exposes general purpose computing on NVidia GPUs. 
+GPUs are massively parallel and provide high levels of arithmetic throughput in comparison to the CPU.
+The high performance of a GPU comes at the cost of high programming complexity.
+
+</p><p>
+OpenMP is a multi-platform API to write multi-threaded CPU code in the C family of languages.
+It manages individual threads internally and exports a simple API for loop-level concurrency.
+The pthreads API is more common, powerful and gives the user more control but with a higher level of programming complexity.
+
+</p><p>
+In this paper we present performance improvements to the DUCHAMP source finder.
+We investigate performance bottlenecks in the source finder by running a profiler.
+
+</p><p>
+We first investigate bottlenecks in the source finder, find algorithmic improvements and then use parallelism to speed it up.
+
+</p>
+<h3>DUCHAMP</h3>
+<p>
+\textsc{Duchamp} is a three dimensional source finder written by Matthew Whiting at the Australia Telescope National Facility. 
+The \textsc{Duchamp} source finding strategy  is the most reliable and complete of all source finding strategies that were tested by Popping et al \cite{popping2012comparison}.
+This makes it an ideal candidate for acceleration, as it would be the most useful for use by future large hydrogen surveys. 
+</p><p>
+
+\textsc{Duchamp} currently runs in a single thread on a single CPU core.
+There have been multiple attempts to run parts of the \textsc{Duchamp} pipeline over multiple CPU cores \cite{scott}.
+Badenhorst et al successfully sped up the A' Trous noise removal algorithm, which was the greatest contributor to the execution time, by 13x with eight threads on a quad-core CPU.
+This speed up came with a 6x memory usage penalty.
+They found that with the speed up in the noise removal the execution time is now dominated by the statistics section of the pipeline.
+Finally, they note that GPU acceleration has the potential to dramatically increase performance.
+
+</p><p>
+Selavy \cite{whiting2012source} is a distributed version of \textsc{Duchamp} that runs across multiple CPU cores across multiple hosts using the Messaging Passing Interface to communicate between hosts.
+It too accelerated the noise removal algorithm with a small loss in precision due to using approximate statistics methods and converting from computation with doubles to floats. 
+It was designed to run on a cluster of nodes each with several CPU cores where the entire data cube is unable to fit onto a single node. 
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         </div>
         <div class="col-sm-6">
