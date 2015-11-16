@@ -332,7 +332,9 @@ Identifying the next acceleration step follows from profiling our implementation
 Finding where our program is the slowest helps us identify what part to accelerate.
 A profiler is used to find slow parts of the program.
 <p class="centered">
+<a href="duchamp/simple-profile.png" data-lightbox="duchamp-profile">
 <img class="img-thumbnail" src="duchamp/simple-profile.png">
+</a>
 </p>
 <p>
 The figure above shows us the profiling information of this implementation.
@@ -397,7 +399,9 @@ Using templates prevents branch divergence and unnecessary comparisons when the 
 <h3>Results and Discussion</h3>
 <p>
 <p class="centered">
+<a href="duchamp/overview.png" data-lightbox="duchamp-overview">
 <img class="img-thumbnail" src="duchamp/overview.png">
+</a>
 </p>
 Benchmarking shows that the separable GPU implementation (shown in the figure above) is the fastest over all data cube sizes.
 Our reimplementation of the single-threaded algorithm (labeled ``simple'' on the graph) does not perform as well as the original DUCHAMP implementation.
@@ -409,7 +413,9 @@ This is consistent with the analysis by Badenhorst et al.
 </p>
 
 <p class="centered">
+<a href="duchamp/speedup.png" data-lightbox="duchamp-speedup">
 <img class="img-thumbnail" src="duchamp/speedup.png">
+</a>
 </p>
 <p>
 The speedup graph above shows the speedup of each implementation compared to DUCHAMP's execution time.
@@ -434,7 +440,9 @@ Integrating this change into DUCHAMP would be rather simple as all changes are c
 </p>
 
 <p class="centered">
+<a href="duchamp/openmp-hex-threads-speedup.png" data-lightbox="duchamp-hex-openmp">
 <img class="img-thumbnail" src="duchamp/openmp-hex-threads-speedup.png">
+</a>
 </p><p>
 The OpenMP benchmark was run on a desktop machine as well as the Hex computing cluster.
 The desktop machine has four physical cores each with Hyper-Threading enabled.
@@ -446,7 +454,9 @@ Adding four more virtual core only gives us a speedup from 3.5x to 4.5x.
 
 </p>
 <p class="centered">
+<a href="duchamp/openmp-hex-threads.png" data-lightbox="duchamp-openmp-hex-threads">
 <img class="img-thumbnail" src="duchamp/openmp-hex-threads.png">
+</a>
 </p><p>
 Running on the Hex computing cluster showed that increasing the number of cores gives a linear increase in speedup.
 The speedup is less than the number of cores it is run on and appears to grow linearly.
