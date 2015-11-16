@@ -7,6 +7,7 @@ p {
     font-family: sans-serif;
     font-weight: 100;
     color: #ccc;
+    text-align: justify;
 }
 
 body {
@@ -112,6 +113,18 @@ body {
 
 /* INTRODUCTION */
 
+.img-thumbnail {
+    max-height: 300px;
+    max-width: 300px;
+}
+.img-thumbnail.full {
+    max-height: 100%;
+    max-width: 100%;
+}
+p.centered {
+    text-align: center;
+}
+
 #introduction {
     /* height: 600px; */
 }
@@ -155,7 +168,7 @@ body {
     margin-top: 10px;
 }
 #objective p {
-    font-size: 22px;
+    font-size: 18px;
 }
 
 .starfield, .lightspeed-starfield {
@@ -286,6 +299,11 @@ body {
     font-size: 28px;
     margin: 20px 60px;
     font-family: serif;
+}
+.speedup-graph.quote {
+    padding-top: 10px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
 }
 .speedup-graph img {
     width: 75%;
